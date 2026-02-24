@@ -1,0 +1,10 @@
+.git
+.gitignore
+.idea
+.vscode
+build
+.gradle
+out
+.DS_Store
+Thumbs.db
+bin

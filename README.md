@@ -51,6 +51,47 @@ By default, the API runs at:
 
 - `http://localhost:8080`
 
+## Run with Docker
+
+### Option 1: Docker Compose (recommended)
+
+Build and start:
+
+```bash
+docker compose up --build
+```
+
+Run in background:
+
+```bash
+docker compose up --build -d
+```
+
+Stop and remove container:
+
+```bash
+docker compose down
+```
+
+### Option 2: Docker only
+
+Build image:
+
+```bash
+docker build -t franquicias-api:latest .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 8080:8080 --name franquicias-api franquicias-api:latest
+```
+
+### Notes
+
+- The image uses a multi-stage build and compiles the project with Gradle inside Docker.
+- The app remains available at `http://localhost:8080`.
+
 ## How to use the API (quick flow)
 
 ### 1) Health check
