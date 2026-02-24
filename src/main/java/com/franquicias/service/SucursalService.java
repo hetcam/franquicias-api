@@ -32,6 +32,18 @@ public class SucursalService {
         return SucursalResponse.from(sucursal);
     }
 
+    @Transactional
+    public SucursalResponse updateSucursalName(Long franquiciaId, Long sucursalId, String name) {
+        franquiciaService.findById(franquiciaId);
+        Sucursal sucursal = findById(sucursalId);
+        if (!sucursal.getFranquicia().getId().equals(franquiciaId)) {
+            throw new NotFoundException("Sucursal does not belong to franquicia: " + franquiciaId);
+        }
+        sucursal.setName(name);
+        sucursal = sucursalRepository.save(sucursal);
+        return SucursalResponse.from(sucursal);
+    }
+
     public Sucursal findById(Long id) {
         return sucursalRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sucursal not found: " + id));

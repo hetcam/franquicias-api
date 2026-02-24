@@ -61,6 +61,18 @@ public class ProductoService {
         return ProductoResponse.from(producto);
     }
 
+    @Transactional
+    public ProductoResponse updateProductoName(Long sucursalId, Long productoId, String name) {
+        Producto producto = productoRepository.findById(productoId)
+                .orElseThrow(() -> new NotFoundException("Producto not found: " + productoId));
+        if (!producto.getSucursal().getId().equals(sucursalId)) {
+            throw new NotFoundException("Producto does not belong to sucursal: " + sucursalId);
+        }
+        producto.setName(name);
+        producto = productoRepository.save(producto);
+        return ProductoResponse.from(producto);
+    }
+
     /**
      * Returns the product with the highest stock per branch for the given franchise.
      * Branches with no products are omitted from the result.

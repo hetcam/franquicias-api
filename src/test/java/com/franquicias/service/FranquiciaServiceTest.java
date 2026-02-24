@@ -54,6 +54,45 @@ class FranquiciaServiceTest {
     }
 
     @Nested
+    @DisplayName("updateFranquiciaName")
+    class UpdateFranquiciaName {
+
+        @Test
+        @DisplayName("updates name and returns response")
+        void updatesNameAndReturnsResponse() {
+            Long id = 1L;
+            Franquicia existing = new Franquicia();
+            existing.setId(id);
+            existing.setName("Vieja");
+
+            Franquicia saved = new Franquicia();
+            saved.setId(id);
+            saved.setName("Nueva");
+
+            when(franquiciaRepository.findById(id)).thenReturn(Optional.of(existing));
+            when(franquiciaRepository.save(existing)).thenReturn(saved);
+
+            FranquiciaResponse result = franquiciaService.updateFranquiciaName(id, "Nueva");
+
+            assertThat(result.id()).isEqualTo(id);
+            assertThat(result.name()).isEqualTo("Nueva");
+            verify(franquiciaRepository).findById(id);
+            verify(franquiciaRepository).save(existing);
+        }
+
+        @Test
+        @DisplayName("throws NotFoundException when franquicia does not exist")
+        void throwsNotFoundWhenFranquiciaMissing() {
+            Long id = 999L;
+            when(franquiciaRepository.findById(id)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> franquiciaService.updateFranquiciaName(id, "Nueva"))
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("Franquicia not found: 999");
+        }
+    }
+
+    @Nested
     @DisplayName("findById")
     class FindById {
 

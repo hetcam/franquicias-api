@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +44,6 @@ class SucursalServiceTest {
         void createsSucursalWhenFranquiciaExists() {
             Long franquiciaId = 1L;
             String name = "Sucursal Centro";
-            String address = "Calle Principal 123";
 
             Franquicia franquicia = new Franquicia();
             franquicia.setId(franquiciaId);
@@ -58,7 +58,7 @@ class SucursalServiceTest {
             when(franquiciaService.findById(franquiciaId)).thenReturn(franquicia);
             when(sucursalRepository.save(any(Sucursal.class))).thenReturn(saved);
 
-            SucursalResponse result = sucursalService.createSucursal(franquiciaId, name, address);
+            SucursalResponse result = sucursalService.createSucursal(franquiciaId, name);
 
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo(1L);
@@ -76,10 +76,88 @@ class SucursalServiceTest {
             when(franquiciaService.findById(franquiciaId))
                     .thenThrow(new NotFoundException("Franquicia not found: 999"));
 
-            assertThatThrownBy(() -> sucursalService.createSucursal(franquiciaId, "Name", "Address"))
+            assertThatThrownBy(() -> sucursalService.createSucursal(franquiciaId, "Name"))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessage("Franquicia not found: 999");
             verify(franquiciaService).findById(franquiciaId);
+        }
+    }
+
+    @Nested
+    @DisplayName("updateSucursalName")
+    class UpdateSucursalName {
+
+        @Test
+        @DisplayName("updates sucursal name when it belongs to franquicia")
+        void updatesSucursalNameWhenBelongsToFranquicia() {
+            Long franquiciaId = 1L;
+            Long sucursalId = 2L;
+            String newName = "Sucursal Norte";
+
+            Franquicia franquicia = new Franquicia();
+            franquicia.setId(franquiciaId);
+
+            Sucursal sucursal = new Sucursal();
+            sucursal.setId(sucursalId);
+            sucursal.setName("Sucursal Sur");
+            sucursal.setFranquicia(franquicia);
+
+            when(franquiciaService.findById(franquiciaId)).thenReturn(franquicia);
+            when(sucursalRepository.findById(sucursalId)).thenReturn(Optional.of(sucursal));
+            when(sucursalRepository.save(sucursal)).thenReturn(sucursal);
+
+            SucursalResponse result = sucursalService.updateSucursalName(franquiciaId, sucursalId, newName);
+
+            assertThat(result.id()).isEqualTo(sucursalId);
+            assertThat(result.name()).isEqualTo(newName);
+            assertThat(result.franquiciaId()).isEqualTo(franquiciaId);
+            verify(sucursalRepository).save(sucursal);
+        }
+
+        @Test
+        @DisplayName("throws NotFoundException when sucursal belongs to another franquicia")
+        void throwsWhenSucursalBelongsToAnotherFranquicia() {
+            Long franquiciaId = 1L;
+            Long otherFranquiciaId = 2L;
+            Long sucursalId = 3L;
+
+            Franquicia requestedFranquicia = new Franquicia();
+            requestedFranquicia.setId(franquiciaId);
+            Franquicia otherFranquicia = new Franquicia();
+            otherFranquicia.setId(otherFranquiciaId);
+
+            Sucursal sucursal = new Sucursal();
+            sucursal.setId(sucursalId);
+            sucursal.setFranquicia(otherFranquicia);
+
+            when(franquiciaService.findById(franquiciaId)).thenReturn(requestedFranquicia);
+            when(sucursalRepository.findById(sucursalId)).thenReturn(Optional.of(sucursal));
+
+            assertThatThrownBy(() -> sucursalService.updateSucursalName(franquiciaId, sucursalId, "X"))
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("Sucursal does not belong to franquicia: 1");
+        }
+    }
+
+    @Nested
+    @DisplayName("findByFranquiciaId")
+    class FindByFranquiciaId {
+
+        @Test
+        @DisplayName("returns sucursales for franquicia")
+        void returnsSucursalesForFranquicia() {
+            Long franquiciaId = 1L;
+            Sucursal s1 = new Sucursal();
+            s1.setId(1L);
+            Sucursal s2 = new Sucursal();
+            s2.setId(2L);
+
+            when(sucursalRepository.findByFranquiciaId(franquiciaId)).thenReturn(List.of(s1, s2));
+
+            List<Sucursal> result = sucursalService.findByFranquiciaId(franquiciaId);
+
+            assertThat(result).hasSize(2);
+            verify(sucursalRepository).findByFranquiciaId(franquiciaId);
         }
     }
 

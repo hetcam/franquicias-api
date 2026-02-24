@@ -24,6 +24,14 @@ public class FranquiciaService {
         return FranquiciaResponse.from(franquicia);
     }
 
+    @Transactional
+    public FranquiciaResponse updateFranquiciaName(Long id, String name) {
+        Franquicia franquicia = findById(id);
+        franquicia.setName(name);
+        franquicia = franquiciaRepository.save(franquicia);
+        return FranquiciaResponse.from(franquicia);
+    }
+
     public Franquicia findById(Long id) {
         return franquiciaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Franquicia not found: " + id));

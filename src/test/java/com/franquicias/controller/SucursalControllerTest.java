@@ -3,6 +3,7 @@ package com.franquicias.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.franquicias.dto.CreateProductoRequest;
 import com.franquicias.dto.ProductoResponse;
+import com.franquicias.dto.UpdateProductoNameRequest;
 import com.franquicias.dto.UpdateStockRequest;
 import com.franquicias.exception.GlobalExceptionHandler;
 import com.franquicias.exception.NotFoundException;
@@ -182,6 +183,63 @@ class SucursalControllerTest {
             mockMvc.perform(patch("/api/sucursales/1/productos/1/stock")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /api/sucursales/{sucursalId}/productos/{productoId}/name")
+    class UpdateProductoName {
+
+        @Test
+        @DisplayName("returns 200 and updated producto when valid")
+        void returns200AndProductoWhenValid() throws Exception {
+            Long sucursalId = 1L;
+            Long productoId = 2L;
+            UpdateProductoNameRequest request = new UpdateProductoNameRequest();
+            request.setName("Producto Renombrado");
+            ProductoResponse response = new ProductoResponse(productoId, "Producto Renombrado", 10, sucursalId);
+
+            when(productoService.updateProductoName(sucursalId, productoId, "Producto Renombrado"))
+                    .thenReturn(response);
+
+            mockMvc.perform(patch("/api/sucursales/" + sucursalId + "/productos/" + productoId + "/name")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(2))
+                    .andExpect(jsonPath("$.name").value("Producto Renombrado"))
+                    .andExpect(jsonPath("$.stock").value(10))
+                    .andExpect(jsonPath("$.sucursalId").value(1));
+
+            verify(productoService).updateProductoName(sucursalId, productoId, "Producto Renombrado");
+        }
+
+        @Test
+        @DisplayName("returns 404 when producto does not exist")
+        void returns404WhenProductoNotFound() throws Exception {
+            UpdateProductoNameRequest request = new UpdateProductoNameRequest();
+            request.setName("Producto Renombrado");
+
+            when(productoService.updateProductoName(1L, 999L, "Producto Renombrado"))
+                    .thenThrow(new NotFoundException("Producto not found: 999"));
+
+            mockMvc.perform(patch("/api/sucursales/1/productos/999/name")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error").value("Producto not found: 999"));
+        }
+
+        @Test
+        @DisplayName("returns 400 when name is blank")
+        void returns400WhenNameBlank() throws Exception {
+            UpdateProductoNameRequest request = new UpdateProductoNameRequest();
+            request.setName("");
+
+            mockMvc.perform(patch("/api/sucursales/1/productos/1/name")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest());
         }
     }
