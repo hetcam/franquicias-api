@@ -1,6 +1,6 @@
 # franquicias-api
 
-RESTful API for franquicias, sucursales, and productos built with **Java 17**, **Spring Boot**, and **Gradle**.
+RESTful API for franquicias, sucursales, and productos built with **Java 17**, **Spring Boot**, and **Maven**.
 
 ## What this project does
 
@@ -15,7 +15,7 @@ The API allows you to:
 ## Requirements
 
 - Java 17+
-- Gradle (optional, only if you do not use the wrapper)
+- Maven 3.9+
 
 ## Run locally
 
@@ -24,13 +24,13 @@ The API allows you to:
 Linux/macOS:
 
 ```bash
-./gradlew build
+mvn clean verify
 ```
 
 Windows:
 
 ```cmd
-.\gradlew.bat build
+mvn clean verify
 ```
 
 ### Start the API
@@ -38,13 +38,13 @@ Windows:
 Linux/macOS:
 
 ```bash
-./gradlew bootRun
+mvn spring-boot:run
 ```
 
 Windows:
 
 ```cmd
-.\gradlew.bat bootRun
+mvn spring-boot:run
 ```
 
 By default, the API runs at:
@@ -89,7 +89,7 @@ docker run --rm -p 8080:8080 --name franquicias-api franquicias-api:latest
 
 ### Notes
 
-- The image uses a multi-stage build and compiles the project with Gradle inside Docker.
+- The image uses a multi-stage build and compiles the project with Maven inside Docker.
 - The app remains available at `http://localhost:8080`.
 
 ## How to use the API (quick flow)
@@ -141,7 +141,7 @@ The project generates OpenAPI documentation automatically from the controllers a
 
 ### Recommended way to explore endpoints
 
-1. Start the app with `bootRun`.
+1. Start the app with `mvn spring-boot:run`.
 2. Open Swagger UI in your browser.
 3. Expand a tag (`Franquicias`, `Productos`, `Health`).
 4. Click an endpoint and select **Try it out**.
@@ -175,4 +175,4 @@ You can use the JSON spec (`/v3/api-docs`) to:
 
 - `src/main/java/com/franquicias/` - application, controllers, services, entities, and DTOs
 - `src/main/resources/` - `application.properties`
-- `build.gradle` - dependencies and build configuration
+- `pom.xml` - dependencies and build configuration

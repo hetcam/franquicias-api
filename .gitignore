@@ -1,6 +1,7 @@
-# Gradle
-.gradle/
+# Build
+target/
 build/
+.gradle/
 
 # IDE
 .idea/
@@ -12,7 +13,6 @@ build/
 *.swo
 
 # Java
-target/
 *.class
 *.jar
 *.war
